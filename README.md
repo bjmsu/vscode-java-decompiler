@@ -1,3 +1,8 @@
+2021.07.18 Update
+
+1. Update procyon to support JDK11.
+2. When showDebugLineNumbers of procyon is true, align debug line to original.
+
 # Decompiler for Java&trade; in Visual Studio Code
 
 This extension allows you to decompile Java class files. It requires [Language Support for Java&trade; by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java), version 0.12.0 or greater.
