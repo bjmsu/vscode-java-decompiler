@@ -1,7 +1,7 @@
 # 2021.07.18 Update
 
 1. Update procyon to support JDK11.
-2. When showDebugLineNumbers of procyon is true, align debug line to original.
+2. When showDebugLineNumbers of procyon is true, align debug line to original line.
 
 # Decompiler for Java&trade; in Visual Studio Code
 
