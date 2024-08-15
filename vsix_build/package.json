@@ -1,0 +1,101 @@
+{
+    "name": "decompile-java",
+    "displayName": "Decompile Java",
+    "description": "Decompile Java via Procyon",
+    "author": "BenjaminSu",
+    "icon": "icon.png",
+    "version": "0.0.1",
+    "license": "EPL-1.0",
+    "publisher": "BenjaminSu",
+    "engines": {
+        "vscode": "^1.5.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bjmsu/vscode-java-decompiler"
+    },
+    "contributes": {
+        "javaExtensions": [
+            "./server/decompile-java.jar"
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Decompiler configuration",
+            "properties": {
+                "java.decompiler.procyon": {
+                    "type": "object",
+                    "description": "Procyon configuration",
+                    "properties": {
+                        "mergeVariables": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Attempt to merge as many variables as possible.  This may lead to fewer declarations, but at the expense of inlining and useful naming.  This feature is experimental and may be removed or become the standard behavior in future releases."
+                        },
+                        "collapseImports": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Collapse multiple imports from the same package into a single wildcard import."
+                        },
+                        "forceExplicitTypeArguments": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Always print type arguments to generic methods."
+                        },
+                        "retainRedundantCasts": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Do not remove redundant explicit casts."
+                        },
+                        "flattenSwitchBlocks": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Drop the braces statements around switch sections when possible."
+                        },
+                        "showSyntheticMembers": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Show synthetic (compiler-generated) members."
+                        },
+                        "excludeNestedTypes": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Exclude nested types when decompiling their enclosing types."
+                        },
+                        "showDebugLineNumbers": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "For debugging, show Java line numbers as inline comments (implies -ln; requires -o)."
+                        },
+                        "retainPointlessSwitches": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Do not lift the contents of switches having only a default label."
+                        },
+                        "isUnicodeOutputEnabled": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Enable Unicode output (printable non-ASCII characters will not be escaped)."
+                        },
+                        "simplifyMemberReferences": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Simplify type-qualified member references in Java output [EXPERIMENTAL]."
+                        },
+                        "disableForEachTransforms": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Disable 'for each' loop transforms."
+                        }
+                    },
+                    "default": null
+                }
+            }
+        }
+    },
+    "extensionDependencies": [
+        "redhat.java"
+    ]
+}
