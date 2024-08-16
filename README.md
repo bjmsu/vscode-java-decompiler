@@ -1,1 +1,1 @@
-[README](vsix_build/README.md)
+{!vsix_build/README.md!}
