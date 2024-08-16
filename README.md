@@ -1,1 +1,1 @@
-{!vsix_build/README.md!}
+[filename](vsix_build/README.md ':include :type=code')
