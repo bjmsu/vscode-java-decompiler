@@ -34,6 +34,14 @@
 			<systemPath>${project.basedir}/lib/procyon-core-0.6.0.jar</systemPath>
         </dependency>
         <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.26.1</version>
+            <scope>system</scope>
+			<systemPath>${project.basedir}/lib/javaparser-core-3.26.1.jar</systemPath>
+        </dependency>
+        
+        <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.core.runtime</artifactId>
             <version>3.31.100</version>
@@ -83,7 +91,7 @@
                 <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                 <Require-Bundle>org.eclipse.jdt.ls.core;bundle-version="1.8.0",org.eclipse.jdt.core,org.eclipse.equinox.common,com.google.gson</Require-Bundle>
                 <Export-Package>com.benjamin.su.decompiler</Export-Package>
-                <Bundle-ClassPath>.,lib/procyon-compilertools-0.6.0.jar,lib/procyon-core-0.6.0.jar</Bundle-ClassPath>
+                <Bundle-ClassPath>.,lib/procyon-compilertools-0.6.0.jar,lib/procyon-core-0.6.0.jar,lib/javaparser-core-3.26.1.jar</Bundle-ClassPath>
                 <Bundle-Vendor>%Bundle-Vendor</Bundle-Vendor>
                 <Automatic-Module-Name>com.benjamin.su.decompiler</Automatic-Module-Name>
             </manifestEntries>
