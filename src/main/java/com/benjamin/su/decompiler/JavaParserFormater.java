@@ -25,9 +25,9 @@ public class JavaParserFormater {
             Matcher n2Matcher=pattern.matcher(n2.toString());
             boolean n1Find=n1Matcher.find();
             boolean n2Find=n2Matcher.find();
-            if(n1Find&&!n2Find){return 1;}
+            if(n1Find&&!n2Find){return -1;}
 
-            if(!n1Find&&n2Find){return -1;}
+            if(!n1Find&&n2Find){return 1;}
 
             if(!n1Find&&!n2Find){return 0;}
 
