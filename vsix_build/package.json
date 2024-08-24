@@ -4,7 +4,7 @@
     "description": "Decompile Java via Procyon",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
     "engines": {
