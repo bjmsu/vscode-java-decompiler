@@ -1,10 +1,10 @@
 {
     "name": "decompile-java",
-    "displayName": "Decompile Java",
-    "description": "Decompile Java via Procyon",
+    "displayName": "Decompile Java Pretty",
+    "description": "Decompile Java via Procyon, and format",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
     "engines": {
