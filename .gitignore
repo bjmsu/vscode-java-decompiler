@@ -1,2 +1,5 @@
 target/
 .DS_Store
+vsix_build/node_modules/*
+vsix_build/out
+vsix_build/*.vsix

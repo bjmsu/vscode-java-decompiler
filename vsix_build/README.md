@@ -1,33 +1,67 @@
-# 2024.08.24 Update
-1. Using Javaparser to format as priority, if fail, using default formater. 
-2. JavaParserFormater will re-sort line/CodeBlock base on line No.
+# Decompile Java Pretty
+
+Decompile Java class files using [Procyon](https://github.com/mstrobel/procyon), with source line number alignment and member reordering.
+
 ![sample](https://raw.githubusercontent.com/bjmsu/vscode-java-decompiler/master/vsix_build/sample.jpg "sample")
 
+## Features
 
-# 2024.08.15 Update
-1. Remove fernflower/cfr
-2. Using org.jboss.windup.decompiler.procyon.LineNumberPrintWriter
-     and org.jboss.windup.decompiler.procyon.LineNumberFormatter
-   to format source code for better debug.
-3. Build up the project, will support decomoile class file directly, and jar file.
+### Decompile `.class` files
+Open any `.class` file in a Java project — the decompiled source is shown automatically with line numbers aligned to the original bytecode.
 
-# 2021.07.18 Update
-1. Update procyon to support JDK11.
-2. When showDebugLineNumbers of procyon is true, align debug line to original line.
+To see it in action, right-click on a Java symbol for which you don't have the source code and choose **Go to Definition** (or Ctrl/Cmd+click). The decompiled code is displayed.
 
+### Browse and decompile JAR / WAR / ZIP archives
+Drag a `.jar`, `.war`, or `.zip` file into VS Code, or right-click it in the Explorer and choose **Open as Decompiled JAR/WAR**.
 
-# Decompiler for Java&trade; in Visual Studio Code
-*  This extension allows you to decompile Java class files. It requires [Language Support for Java&trade; by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java), version 0.12.0 or greater.
+- The file listing is shown in the editor
+- The **JAR / WAR Contents** panel in the Explorer sidebar shows the full directory tree
+- Click any `.class` entry to decompile it
+- Click other files (`.xml`, `.properties`, `MANIFEST.MF`, etc.) to view their raw content
 
-*  To see the decompiler in action, right-click on a Java symbol for which you don't have the source code, and choose Go to Definition (or simply command/ctrl+click on the symbol). You will see the decompiled code.
+### Nested JAR support
+JARs inside a WAR's `WEB-INF/lib/` directory are shown as expandable folders — contents are loaded lazily on expand.
 
+### Windows + WSL support
+Windows file paths are automatically converted to WSL-compatible paths (`C:\...` → `/mnt/c/...`).
 
 ## Requirements
-*  [Language Support for Java&trade; by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java), version 0.12.0 or greater. This extension does not work with older versions.
 
+- [Language Support for Java&trade; by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java), version 0.12.0 or greater.
 
 ## Extension Settings
-You can use the following settings to customize the decompiler:
 
-* `java.contentProvider.preferred` (settings.json only): the ID of a decompiler to use. Currently, only `procyon` are supported..
-* `java.decompiler.procyon` : additional configuration to provide to the decompiler. The format depends on the chosen decompiler. Use the autocomplete functionality of Visual Studio Code's settings to view the possible options and their descriptions.
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `java.decompiler.procyon.mergeVariables` | `false` | Attempt to merge variables |
+| `java.decompiler.procyon.collapseImports` | `false` | Collapse wildcard imports |
+| `java.decompiler.procyon.forceExplicitTypeArguments` | `false` | Always print generic type arguments |
+| `java.decompiler.procyon.retainRedundantCasts` | `false` | Do not remove redundant casts |
+| `java.decompiler.procyon.showSyntheticMembers` | `false` | Show compiler-generated members |
+| `java.decompiler.procyon.excludeNestedTypes` | `false` | Exclude nested types when decompiling |
+| `java.decompiler.procyon.isUnicodeOutputEnabled` | `false` | Output Unicode characters directly |
+| `java.decompiler.procyon.flattenSwitchBlocks` | `false` | Drop braces around switch sections |
+| `java.decompiler.procyon.simplifyMemberReferences` | `false` | Simplify type-qualified member references |
+| `java.decompiler.procyon.disableForEachTransforms` | `false` | Disable for-each loop transforms |
+
+## Changelog
+
+### 2026.05
+- Added JAR / WAR / ZIP archive browser (TreeView in Explorer sidebar)
+- Added nested JAR browsing (e.g. `WEB-INF/lib/*.jar` inside a WAR)
+- Added support for viewing non-class files inside archives
+- Added Windows + WSL path normalization
+- Fixed `IndexOutOfBoundsException` in `JavaParserFormater` for edge cases
+- Cache now uses content hash (SHA-256) instead of file identifier
+
+### 2024.08.24
+- Using JavaParser to format as priority; falls back to default formatter on failure
+- JavaParserFormater re-sorts members by line number
+
+### 2024.08.15
+- Removed fernflower/cfr decompilers
+- Using Procyon `LineNumberFormatter` for better debug line alignment
+
+### 2021.07.18
+- Updated Procyon to support JDK 11
+- When `showDebugLineNumbers` is enabled, output lines are aligned to original source lines

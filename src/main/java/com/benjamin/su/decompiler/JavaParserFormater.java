@@ -68,13 +68,13 @@ public class JavaParserFormater {
             for (int i=0;i<javaStringList.size();i++) {
                 line=javaStringList.get(i);
                 Matcher matcher=pattern.matcher(line);
-                if(matcher.find()){
+                if(matcher.find() && i+1<javaStringList.size()){
                     String lineNoStr=matcher.group(0);
                     line=line.replace(lineNoStr, "")+" "+javaStringList.get(i+1).trim()+lineNoStr;
                     javaStringList.set(i, line);
                     javaStringList.remove(i+1);
                 }
-                if(javaStringList.get(i).trim().endsWith("{")&&javaStringList.get(i+1).trim().equals("}")){
+                if(i+1<javaStringList.size() && javaStringList.get(i).trim().endsWith("{")&&javaStringList.get(i+1).trim().equals("}")){
                     line=javaStringList.remove(i);
                     javaStringList.set(i, line+"}");
                 }

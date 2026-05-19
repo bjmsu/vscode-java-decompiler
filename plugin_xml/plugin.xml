@@ -5,4 +5,14 @@
       <contentProvider id="procyon" class="com.benjamin.su.decompiler.ProcyonDecompiler" priority="999">
       </contentProvider>
    </extension>
+   <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
+      <delegateCommandHandler class="com.benjamin.su.decompiler.JarCommandHandler">
+         <command id="decompile.browseJar"/>
+         <command id="decompile.decompileEntry"/>
+         <command id="decompile.readEntry"/>
+         <command id="decompile.browseNestedJar"/>
+         <command id="decompile.decompileNestedEntry"/>
+         <command id="decompile.readNestedEntry"/>
+      </delegateCommandHandler>
+   </extension>
 </plugin>

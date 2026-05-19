@@ -4,11 +4,12 @@
     "description": "Decompile Java via Procyon, and format",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
+    "main": "./out/extension.js",
     "engines": {
-        "vscode": "^1.5.0"
+        "vscode": "^1.80.0"
     },
     "categories": [
         "Programming Languages"
@@ -17,7 +18,57 @@
         "type": "git",
         "url": "https://github.com/bjmsu/vscode-java-decompiler"
     },
+    "activationEvents": [
+        "onFileSystem:decompiler-jar",
+        "onCommand:decompile-java.openJar",
+        "onCustomEditor:decompile-java.jarViewer",
+        "onView:decompile-java.jarExplorer"
+    ],
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/vscode": "^1.80.0",
+        "typescript": "^5.0.0"
+    },
     "contributes": {
+        "commands": [
+            {
+                "command": "decompile-java.openJar",
+                "title": "Open as Decompiled JAR/WAR"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "decompile-java.openJar",
+                    "when": "resourceExtname == .jar || resourceExtname == .war || resourceExtname == .zip",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "views": {
+            "explorer": [
+                {
+                    "id": "decompile-java.jarExplorer",
+                    "name": "JAR / WAR Contents"
+                }
+            ]
+        },
+        "customEditors": [
+            {
+                "viewType": "decompile-java.jarViewer",
+                "displayName": "JAR/WAR Viewer",
+                "selector": [
+                    { "filenamePattern": "*.jar" },
+                    { "filenamePattern": "*.war" },
+                    { "filenamePattern": "*.zip" }
+                ],
+                "priority": "default"
+            }
+        ],
         "javaExtensions": [
             "./server/decompile-java.jar"
         ],

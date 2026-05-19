@@ -1,1 +1,5 @@
 .vscode/**
+src/**
+tsconfig.json
+node_modules/**
+out/**.js.map

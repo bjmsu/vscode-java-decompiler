@@ -56,8 +56,23 @@ public class ProcyonDecompiler extends CachingDecompiler {
         }
     }
 
+    private URI normalizeUri(URI uri) {
+        String path = uri.getPath();
+        if (path != null && path.matches("/[A-Za-z]:/.*")) {
+            char drive = Character.toLowerCase(path.charAt(1));
+            String rest = path.substring(3).replace('\\', '/');
+            try {
+                return new URI("file", null, "/mnt/" + drive + "/" + rest, null);
+            } catch (Exception e) {
+                return uri;
+            }
+        }
+        return uri;
+    }
+
     @Override
     protected String decompileContent(URI uri, IProgressMonitor monitor) throws CoreException {
+        uri = normalizeUri(uri);
         IClassFile classFile = JDTUtils.resolveClassFile(uri);
         if (classFile != null)
             return decompileContent(classFile, monitor);
@@ -70,7 +85,7 @@ public class ProcyonDecompiler extends CachingDecompiler {
         return getContent((ITypeLoader) new JDTTypeLoader(classFile), "Fake.class", monitor);
     }
 
-    private String getContent(ITypeLoader typeLoader, String path, IProgressMonitor monitor) throws CoreException {
+    synchronized String getContent(ITypeLoader typeLoader, String path, IProgressMonitor monitor) throws CoreException {
         this.settings.setTypeLoader(typeLoader);
         this.settings.setShowDebugLineNumbers(true);
         DecompilationOptions decompilationOptions = new DecompilationOptions();
