@@ -4,7 +4,7 @@
     "description": "Decompile Java via Procyon, and format",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
     "main": "./out/extension.js",
