@@ -2,9 +2,15 @@
 
 Decompile Java class files using [Procyon](https://github.com/mstrobel/procyon), with source line number alignment and member reordering.
 
-![sample](https://raw.githubusercontent.com/bjmsu/vscode-java-decompiler/master/vsix_build/sample.jpg "sample")
-
 ## Features
+
+### 2026.05
+- Added JAR / WAR / ZIP archive browser (TreeView in Explorer sidebar)
+- Added nested JAR browsing (e.g. `WEB-INF/lib/*.jar` inside a WAR)
+- Added support for viewing non-class files inside archives
+- Added Windows + WSL path normalization
+- Fixed `IndexOutOfBoundsException` in `JavaParserFormater` for edge cases
+- Cache now uses content hash (SHA-256) instead of file identifier
 
 ### Decompile `.class` files
 Open any `.class` file in a Java project — the decompiled source is shown automatically with line numbers aligned to the original bytecode.
@@ -46,13 +52,8 @@ Windows file paths are automatically converted to WSL-compatible paths (`C:\...`
 
 ## Changelog
 
-### 2026.05
-- Added JAR / WAR / ZIP archive browser (TreeView in Explorer sidebar)
-- Added nested JAR browsing (e.g. `WEB-INF/lib/*.jar` inside a WAR)
-- Added support for viewing non-class files inside archives
-- Added Windows + WSL path normalization
-- Fixed `IndexOutOfBoundsException` in `JavaParserFormater` for edge cases
-- Cache now uses content hash (SHA-256) instead of file identifier
+
+![sample](https://raw.githubusercontent.com/bjmsu/vscode-java-decompiler/master/vsix_build/sample.jpg "sample")
 
 ### 2024.08.24
 - Using JavaParser to format as priority; falls back to default formatter on failure
