@@ -52,12 +52,14 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
 
-    context.subscriptions.push(
-        vscode.window.createTreeView('decompile-java.jarExplorer', {
-            treeDataProvider: treeProvider,
-            showCollapseAll: true
-        })
-    );
+    const treeView = vscode.window.createTreeView('decompile-java.jarExplorer', {
+        treeDataProvider: treeProvider,
+        showCollapseAll: true
+    });
+    context.subscriptions.push(treeView);
+
+    treeView.onDidExpandElement(e => treeProvider.setNodeCollapsed(e.element, false), undefined, context.subscriptions);
+    treeView.onDidCollapseElement(e => treeProvider.setNodeCollapsed(e.element, true), undefined, context.subscriptions);
 
     const openJar = async (uri: vscode.Uri) => {
         treeProvider.addJar(normalizePath(uri.fsPath));
@@ -78,6 +80,18 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
         vscode.commands.registerCommand('decompile-java.closeAllJars', () => {
             treeProvider.removeAllJars();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('decompile-java.collapseNode', async (node: JarNode) => {
+            await treeProvider.collapseNode(node);
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('decompile-java.expandAllNode', async (node: JarNode) => {
+            await treeProvider.expandAllUnder(node);
         })
     );
 

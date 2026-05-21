@@ -4,7 +4,7 @@
     "description": "Decompile Java via Procyon, and format",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
     "main": "./out/extension.js",
@@ -48,6 +48,16 @@
                 "command": "decompile-java.closeAllJars",
                 "title": "Close All JARs",
                 "icon": "$(close-all)"
+            },
+            {
+                "command": "decompile-java.expandAllNode",
+                "title": "Expand All",
+                "icon": "$(expand-all)"
+            },
+            {
+                "command": "decompile-java.collapseNode",
+                "title": "Collapse",
+                "icon": "$(collapse-all)"
             }
         ],
         "menus": {
@@ -67,8 +77,18 @@
             ],
             "view/item/context": [
                 {
+                    "command": "decompile-java.expandAllNode",
+                    "when": "view == decompile-java.jarExplorer && viewItem =~ /-collapsed$/",
+                    "group": "inline"
+                },
+                {
+                    "command": "decompile-java.collapseNode",
+                    "when": "view == decompile-java.jarExplorer && viewItem =~ /-expanded$/",
+                    "group": "inline"
+                },
+                {
                     "command": "decompile-java.closeJar",
-                    "when": "view == decompile-java.jarExplorer && viewItem == jarRoot",
+                    "when": "view == decompile-java.jarExplorer && viewItem =~ /^jarRoot/",
                     "group": "inline"
                 }
             ]

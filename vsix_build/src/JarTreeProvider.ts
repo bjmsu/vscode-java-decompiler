@@ -26,6 +26,17 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
     private readonly jarPathToId = new Map<string, number>();
     private readonly entryCache = new Map<number, string[]>();
     private readonly nestedEntryCache = new Map<string, string[]>();
+    private readonly nodeCollapsedState = new Map<string, boolean>();
+
+    private nodeKey(node: JarNode): string {
+        return `${node.jarId}:${node.nestedJarEntry || ''}:${node.classPath}`;
+    }
+
+    private isNodeCollapsed(node: JarNode): boolean {
+        const key = this.nodeKey(node);
+        if (this.nodeCollapsedState.has(key)) return this.nodeCollapsedState.get(key)!;
+        return !!node.isNestedArchive;
+    }
 
     addJar(jarPath: string): void {
         if (this.jarPathToId.has(jarPath)) return;
@@ -41,8 +52,11 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
         this.idToJarPath.delete(id);
         this.jarPathToId.delete(jarPath);
         this.entryCache.delete(id);
-        for (const key of this.nestedEntryCache.keys()) {
+        for (const key of [...this.nestedEntryCache.keys()]) {
             if (key.startsWith(`${id}!`)) this.nestedEntryCache.delete(key);
+        }
+        for (const key of [...this.nodeCollapsedState.keys()]) {
+            if (key.startsWith(`${id}:`)) this.nodeCollapsedState.delete(key);
         }
         this._onDidChangeTreeData.fire();
     }
@@ -52,7 +66,32 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
         this.jarPathToId.clear();
         this.entryCache.clear();
         this.nestedEntryCache.clear();
+        this.nodeCollapsedState.clear();
         this._onDidChangeTreeData.fire();
+    }
+
+    setNodeCollapsed(node: JarNode, collapsed: boolean): void {
+        this.nodeCollapsedState.set(this.nodeKey(node), collapsed);
+    }
+
+    async collapseNode(node: JarNode): Promise<void> {
+        const markCollapsed = async (n: JarNode): Promise<void> => {
+            this.nodeCollapsedState.set(this.nodeKey(n), true);
+            const children = await this.getChildren(n);
+            await Promise.all(children.filter(c => c.isDirectory).map(markCollapsed));
+        };
+        await markCollapsed(node);
+        this._onDidChangeTreeData.fire(node);
+    }
+
+    async expandAllUnder(node: JarNode): Promise<void> {
+        const markExpanded = async (n: JarNode): Promise<void> => {
+            this.nodeCollapsedState.set(this.nodeKey(n), false);
+            const children = await this.getChildren(n);
+            await Promise.all(children.filter(c => c.isDirectory).map(markExpanded));
+        };
+        await markExpanded(node);
+        this._onDidChangeTreeData.fire(node);
     }
 
     refresh(): void {
@@ -118,15 +157,17 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
             const label = node.classPath
                 ? path.basename(node.classPath)
                 : path.basename(node.jarPath);
-            // 只有真实的嵌套归档文件才默认折叠（懒加载），普通目录展开
-            const state = node.isNestedArchive
+            const collapsed = this.isNodeCollapsed(node);
+            const state = collapsed
                 ? vscode.TreeItemCollapsibleState.Collapsed
                 : vscode.TreeItemCollapsibleState.Expanded;
             const item = new vscode.TreeItem(label, state);
+            item.id = `${this.nodeKey(node)}-${collapsed ? 'c' : 'e'}`;
             item.iconPath = node.isNestedArchive
                 ? new vscode.ThemeIcon('package')
                 : vscode.ThemeIcon.Folder;
-            if (!node.classPath) item.contextValue = 'jarRoot';
+            const prefix = !node.classPath ? 'jarRoot' : 'jarDir';
+            item.contextValue = collapsed ? `${prefix}-collapsed` : `${prefix}-expanded`;
             return item;
         }
 
