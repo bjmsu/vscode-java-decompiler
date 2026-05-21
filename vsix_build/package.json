@@ -38,6 +38,16 @@
             {
                 "command": "decompile-java.openJar",
                 "title": "Open as Decompiled JAR/WAR"
+            },
+            {
+                "command": "decompile-java.closeJar",
+                "title": "Close JAR",
+                "icon": "$(close)"
+            },
+            {
+                "command": "decompile-java.closeAllJars",
+                "title": "Close All JARs",
+                "icon": "$(close-all)"
             }
         ],
         "menus": {
@@ -46,6 +56,20 @@
                     "command": "decompile-java.openJar",
                     "when": "resourceExtname == .jar || resourceExtname == .war || resourceExtname == .zip",
                     "group": "navigation"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "decompile-java.closeAllJars",
+                    "when": "view == decompile-java.jarExplorer",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "decompile-java.closeJar",
+                    "when": "view == decompile-java.jarExplorer && viewItem == jarRoot",
+                    "group": "inline"
                 }
             ]
         },

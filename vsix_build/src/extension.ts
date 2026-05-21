@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
-import { SCHEME, JarTreeProvider } from './JarTreeProvider';
+import { SCHEME, JarTreeProvider, JarNode } from './JarTreeProvider';
 import { JarFileSystemProvider } from './JarFileSystemProvider';
 import { JAR_LISTING_SCHEME, JarContentProvider } from './JarContentProvider';
 
@@ -24,6 +24,18 @@ function normalizePath(fsPath: string): string {
 export function activate(context: vscode.ExtensionContext): void {
     const treeProvider = new JarTreeProvider();
     const fsProvider = new JarFileSystemProvider(treeProvider);
+
+    // Java LS 就绪后自动刷新树视图
+    vscode.extensions.getExtension('redhat.java')?.activate().then((javaApi) => {
+        const onModeChange = javaApi?.onDidServerModeChange;
+        if (onModeChange) {
+            context.subscriptions.push(
+                onModeChange((mode: string) => {
+                    if (mode === 'Standard') treeProvider.refresh();
+                })
+            );
+        }
+    });
 
     context.subscriptions.push(
         vscode.workspace.registerFileSystemProvider(SCHEME, fsProvider, {
@@ -58,6 +70,18 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('decompile-java.closeJar', (node: JarNode) => {
+            treeProvider.removeJar(node.jarId);
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('decompile-java.closeAllJars', () => {
+            treeProvider.removeAllJars();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.window.registerCustomEditorProvider(
             'decompile-java.jarViewer',
             {
@@ -69,13 +93,18 @@ export function activate(context: vscode.ExtensionContext): void {
                         scheme: JAR_LISTING_SCHEME,
                         path: normalizedPath
                     });
-                    const doc = await vscode.workspace.openTextDocument(listingUri);
-                    await vscode.window.showTextDocument(doc, {
-                        preview: false,
-                        viewColumn: webviewPanel.viewColumn
-                    });
-                    webviewPanel.dispose();
-                    openJar(document.uri);
+                    try {
+                        const doc = await vscode.workspace.openTextDocument(listingUri);
+                        await vscode.window.showTextDocument(doc, {
+                            preview: false,
+                            viewColumn: webviewPanel.viewColumn
+                        });
+                    } catch (e) {
+                        vscode.window.showErrorMessage(`Failed to open JAR listing: ${e}`);
+                    } finally {
+                        webviewPanel.dispose();
+                    }
+                    await openJar(document.uri);
                 }
             },
             { supportsMultipleEditorsPerDocument: false }

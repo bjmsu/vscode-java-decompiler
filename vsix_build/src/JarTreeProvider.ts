@@ -35,34 +35,60 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
         this._onDidChangeTreeData.fire();
     }
 
+    removeJar(id: number): void {
+        const jarPath = this.idToJarPath.get(id);
+        if (!jarPath) return;
+        this.idToJarPath.delete(id);
+        this.jarPathToId.delete(jarPath);
+        this.entryCache.delete(id);
+        for (const key of this.nestedEntryCache.keys()) {
+            if (key.startsWith(`${id}!`)) this.nestedEntryCache.delete(key);
+        }
+        this._onDidChangeTreeData.fire();
+    }
+
+    removeAllJars(): void {
+        this.idToJarPath.clear();
+        this.jarPathToId.clear();
+        this.entryCache.clear();
+        this.nestedEntryCache.clear();
+        this._onDidChangeTreeData.fire();
+    }
+
+    refresh(): void {
+        this.entryCache.clear();
+        this.nestedEntryCache.clear();
+        this._onDidChangeTreeData.fire();
+    }
+
     getJarPath(id: number): string | undefined {
         return this.idToJarPath.get(id);
     }
 
     async getEntries(id: number): Promise<string[]> {
-        if (!this.entryCache.has(id)) {
-            const jarPath = this.idToJarPath.get(id)!;
-            let entries: string[] | undefined;
-            try {
-                entries = await vscode.commands.executeCommand<string[]>(
-                    'java.execute.workspaceCommand',
-                    'decompile.browseJar',
-                    jarPath
-                );
-            } catch (e) {
-                vscode.window.showErrorMessage(
-                    `Failed to browse ${path.basename(jarPath)}: ${e}`
-                );
-            }
-            if (!entries?.length) {
-                vscode.window.showWarningMessage(
-                    `No entries found in ${path.basename(jarPath)}. ` +
-                    `Make sure the Java Language Server is running.`
-                );
-            }
-            this.entryCache.set(id, entries ?? []);
+        if (this.entryCache.has(id)) return this.entryCache.get(id)!;
+        const jarPath = this.idToJarPath.get(id)!;
+        let entries: string[] | undefined;
+        try {
+            entries = await vscode.commands.executeCommand<string[]>(
+                'java.execute.workspaceCommand',
+                'decompile.browseJar',
+                jarPath
+            );
+        } catch (e) {
+            vscode.window.showErrorMessage(
+                `Failed to browse ${path.basename(jarPath)}: ${e}`
+            );
         }
-        return this.entryCache.get(id)!;
+        if (!entries?.length) {
+            vscode.window.showWarningMessage(
+                `No entries found in ${path.basename(jarPath)}. ` +
+                `Make sure the Java Language Server is running.`
+            );
+            return [];  // 不缓存，等 LS 就绪后可自动重试
+        }
+        this.entryCache.set(id, entries);
+        return entries;
     }
 
     private async getNestedEntries(id: number, jarPath: string, nestedJarEntry: string): Promise<string[]> {
@@ -81,7 +107,8 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
                     `Failed to browse ${path.basename(nestedJarEntry)}: ${e}`
                 );
             }
-            this.nestedEntryCache.set(cacheKey, entries ?? []);
+            if (!entries?.length) return [];  // 不缓存，等 LS 就绪后可重试
+            this.nestedEntryCache.set(cacheKey, entries);
         }
         return this.nestedEntryCache.get(cacheKey)!;
     }
@@ -99,6 +126,7 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
             item.iconPath = node.isNestedArchive
                 ? new vscode.ThemeIcon('package')
                 : vscode.ThemeIcon.Folder;
+            if (!node.classPath) item.contextValue = 'jarRoot';
             return item;
         }
 
