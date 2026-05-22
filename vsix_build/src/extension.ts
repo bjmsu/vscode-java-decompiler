@@ -96,6 +96,67 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('decompile-java.openEntry', async (uri: vscode.Uri, innerSuffix?: string) => {
+            const doc = await vscode.workspace.openTextDocument(uri);
+            let position: vscode.Position | undefined;
+
+            if (innerSuffix) {
+                if (/^\d+$/.test(innerSuffix)) {
+                    const n = parseInt(innerSuffix, 10);
+                    // 1. 优先从字节码 LineNumberTable 拿原始行号
+                    const id = parseInt(uri.authority, 10);
+                    const jarPath = treeProvider.getJarPath(id);
+                    if (jarPath) {
+                        const fullPath = uri.path.replace(/^\//, '');
+                        const bangIdx = fullPath.indexOf('!/');
+                        try {
+                            let lineNum: number | undefined;
+                            if (bangIdx !== -1) {
+                                const nestedJar = fullPath.slice(0, bangIdx);
+                                const classEntry = fullPath.slice(bangIdx + 2).replace(/\.java$/, '.class');
+                                lineNum = await vscode.commands.executeCommand<number>(
+                                    'java.execute.workspaceCommand',
+                                    'decompile.getNestedInnerClassLine', jarPath, nestedJar, classEntry
+                                );
+                            } else {
+                                const classEntry = fullPath.replace(/\.java$/, '.class');
+                                lineNum = await vscode.commands.executeCommand<number>(
+                                    'java.execute.workspaceCommand',
+                                    'decompile.getInnerClassLine', jarPath, classEntry
+                                );
+                            }
+                            if (lineNum && lineNum > 0) {
+                                position = new vscode.Position(lineNum - 1, 0);
+                            }
+                        } catch (_) { /* ignore */ }
+                    }
+                    // 2. 回退：在文本中计数第 N 个匿名类体 "new Xxx(...) {"
+                    if (!position) {
+                        let count = 0;
+                        for (let i = 0; i < doc.lineCount; i++) {
+                            const text = doc.lineAt(i).text;
+                            if (/\bnew\s+\w/.test(text) && /\)\s*\{/.test(text)) {
+                                if (++count === n) { position = new vscode.Position(i, 0); break; }
+                            }
+                        }
+                    }
+                } else if (/^[A-Za-z_]\w*$/.test(innerSuffix)) {
+                    // 命名内部类：搜索 class/interface/enum/record 声明
+                    const re = new RegExp(`\\b(?:class|interface|enum|record)\\s+${innerSuffix}\\b`);
+                    for (let i = 0; i < doc.lineCount; i++) {
+                        if (re.test(doc.lineAt(i).text)) { position = new vscode.Position(i, 0); break; }
+                    }
+                }
+            }
+
+            await vscode.window.showTextDocument(doc, {
+                preview: false,
+                selection: position ? new vscode.Range(position, position) : undefined
+            });
+        })
+    );
+
+    context.subscriptions.push(
         vscode.window.registerCustomEditorProvider(
             'decompile-java.jarViewer',
             {

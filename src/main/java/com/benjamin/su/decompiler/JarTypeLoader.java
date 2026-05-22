@@ -19,7 +19,8 @@ public class JarTypeLoader implements ITypeLoader, AutoCloseable {
         this.zipFile = new ZipFile(archivePath);
         boolean isWar = archivePath.toLowerCase().endsWith(".war")
                 || zipFile.getEntry("WEB-INF/classes/") != null;
-        this.classPrefix = isWar ? "WEB-INF/classes/" : "";
+        boolean isSpringBoot = zipFile.getEntry("BOOT-INF/classes/") != null;
+        this.classPrefix = isWar ? "WEB-INF/classes/" : isSpringBoot ? "BOOT-INF/classes/" : "";
     }
 
     @Override

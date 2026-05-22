@@ -188,7 +188,17 @@ export class JarTreeProvider implements vscode.TreeDataProvider<JarNode> {
         const item = new vscode.TreeItem(uri);
         item.collapsibleState = vscode.TreeItemCollapsibleState.None;
         if (!isArchive(node.classPath)) {
-            item.command = { command: 'vscode.open', title: 'Open', arguments: [uri] };
+            const baseName = path.basename(node.classPath, isClass ? '.class' : '');
+            const dollarIdx = isClass ? baseName.indexOf('$') : -1;
+            if (dollarIdx !== -1) {
+                item.command = {
+                    command: 'decompile-java.openEntry',
+                    title: 'Open',
+                    arguments: [uri, baseName.slice(dollarIdx + 1)]
+                };
+            } else {
+                item.command = { command: 'vscode.open', title: 'Open', arguments: [uri] };
+            }
         }
         return item;
     }

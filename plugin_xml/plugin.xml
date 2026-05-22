@@ -13,6 +13,8 @@
          <command id="decompile.browseNestedJar"/>
          <command id="decompile.decompileNestedEntry"/>
          <command id="decompile.readNestedEntry"/>
+         <command id="decompile.getInnerClassLine"/>
+         <command id="decompile.getNestedInnerClassLine"/>
       </delegateCommandHandler>
    </extension>
 </plugin>

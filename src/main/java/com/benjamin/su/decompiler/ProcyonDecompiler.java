@@ -116,7 +116,7 @@ public class ProcyonDecompiler extends CachingDecompiler {
             } catch (Exception e) {
                 StringWriter stringWriter = new StringWriter();
 		        e.printStackTrace(new PrintWriter(stringWriter));
-                return new LineNumberFormatter(context, results.getLineNumberPositions()).reformatFile()+"\n"+tail+"\n//Formater is LineNumberFormatter\n //JavaParserFormater Exception as below"+stringWriter.toString();
+                return new LineNumberFormatter(context, results.getLineNumberPositions()).reformatFile()+"\n"+tail+"\n//Formater is LineNumberFormatter\n //JavaParserFormater Exception as below "+stringWriter.toString();
             }
             
         } catch (Throwable t) {
