@@ -1,16 +1,27 @@
 # Decompile Java Pretty
 
-Decompile Java class files using [Procyon](https://github.com/mstrobel/procyon), with source line number alignment and member reordering.
+Decompile Java class files using [Procyon](https://github.com/mstrobel/procyon) (default) or **[Vineflower](https://github.com/Vineflower/vineflower)**, with source line number alignment.
 
 ## Features
 
-### 2026.05
+### 2026.05 (0.1.3)
+- **Dual decompiler engine: Procyon (default) + [Vineflower](https://github.com/Vineflower/vineflower)** — switch with a single setting, takes effect immediately
+- **Vineflower** — better Java 17+ support, records, sealed classes, pattern matching; line numbers aligned via native bytecode-to-source mapping
 - Added JAR / WAR / ZIP archive browser (TreeView in Explorer sidebar)
 - Added nested JAR browsing (e.g. `WEB-INF/lib/*.jar` inside a WAR)
 - Added support for viewing non-class files inside archives
+- Added Spring Boot fat JAR support (`BOOT-INF/classes/` + loader classes at root)
 - Added Windows + WSL path normalization
-- Fixed `IndexOutOfBoundsException` in `JavaParserFormater` for edge cases
 - Cache now uses content hash (SHA-256) instead of file identifier
+
+### Switch decompiler engine
+
+Open **Settings** and search for `java.decompiler.engine`:
+
+| Value | Engine | Best for |
+|---|---|---|
+| `procyon` *(default)* | Procyon 0.6.0 | General use, stable output |
+| `vineflower` | Vineflower 1.11.1 | Java 17+ features, records, sealed classes |
 
 ### Decompile `.class` files
 Open any `.class` file in a Java project — the decompiled source is shown automatically with line numbers aligned to the original bytecode.
@@ -28,6 +39,9 @@ Drag a `.jar`, `.war`, or `.zip` file into VS Code, or right-click it in the Exp
 ### Nested JAR support
 JARs inside a WAR's `WEB-INF/lib/` directory are shown as expandable folders — contents are loaded lazily on expand.
 
+### Spring Boot fat JAR support
+Spring Boot executable JARs are fully supported — application classes under `BOOT-INF/classes/` and Spring Boot loader classes at the archive root are both handled correctly.
+
 ### Windows + WSL support
 Windows file paths are automatically converted to WSL-compatible paths (`C:\...` → `/mnt/c/...`).
 
@@ -37,32 +51,43 @@ Windows file paths are automatically converted to WSL-compatible paths (`C:\...`
 
 ## Extension Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `java.decompiler.procyon.mergeVariables` | `false` | Attempt to merge variables |
-| `java.decompiler.procyon.collapseImports` | `false` | Collapse wildcard imports |
-| `java.decompiler.procyon.forceExplicitTypeArguments` | `false` | Always print generic type arguments |
-| `java.decompiler.procyon.retainRedundantCasts` | `false` | Do not remove redundant casts |
-| `java.decompiler.procyon.showSyntheticMembers` | `false` | Show compiler-generated members |
-| `java.decompiler.procyon.excludeNestedTypes` | `false` | Exclude nested types when decompiling |
-| `java.decompiler.procyon.isUnicodeOutputEnabled` | `false` | Output Unicode characters directly |
-| `java.decompiler.procyon.flattenSwitchBlocks` | `false` | Drop braces around switch sections |
-| `java.decompiler.procyon.simplifyMemberReferences` | `false` | Simplify type-qualified member references |
-| `java.decompiler.procyon.disableForEachTransforms` | `false` | Disable for-each loop transforms |
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `java.decompiler.engine` | `string` | `procyon` | Decompiler engine: `procyon` or `vineflower` |
+| `java.decompiler.procyon.mergeVariables` | `boolean` | `false` | Attempt to merge variables |
+| `java.decompiler.procyon.collapseImports` | `boolean` | `false` | Collapse wildcard imports |
+| `java.decompiler.procyon.forceExplicitTypeArguments` | `boolean` | `false` | Always print generic type arguments |
+| `java.decompiler.procyon.retainRedundantCasts` | `boolean` | `false` | Do not remove redundant casts |
+| `java.decompiler.procyon.showSyntheticMembers` | `boolean` | `false` | Show compiler-generated members |
+| `java.decompiler.procyon.excludeNestedTypes` | `boolean` | `false` | Exclude nested types when decompiling |
+| `java.decompiler.procyon.isUnicodeOutputEnabled` | `boolean` | `false` | Output Unicode characters directly |
+| `java.decompiler.procyon.flattenSwitchBlocks` | `boolean` | `false` | Drop braces around switch sections |
+| `java.decompiler.procyon.simplifyMemberReferences` | `boolean` | `false` | Simplify type-qualified member references |
+| `java.decompiler.procyon.disableForEachTransforms` | `boolean` | `false` | Disable for-each loop transforms |
 
 ## Changelog
 
-
 ![sample](https://raw.githubusercontent.com/bjmsu/vscode-java-decompiler/master/vsix_build/sample.jpg "sample")
 
-### 2024.08.24
+### 0.1.3 (2026.05)
+- **Dual engine: Procyon (default) + [Vineflower](https://github.com/Vineflower/vineflower)**
+- `java.decompiler.engine` setting to switch engines at runtime (no restart required)
+- Vineflower: line numbers aligned using `bytecode-source-mapping` + `__dump_original_lines__`
+- Spring Boot fat JAR support (`BOOT-INF/classes/` and loader classes)
+- Inner class decompilation fixed for both engines
+
+### 0.1.2 (2026.05)
+- Added JAR / WAR / ZIP archive browser
+- Added nested JAR browsing
+- Added Windows + WSL path support
+- Cache uses SHA-256 content hash
+
+### 0.1.1 (2024.08)
 - Using JavaParser to format as priority; falls back to default formatter on failure
-- JavaParserFormater re-sorts members by line number
 
-### 2024.08.15
+### 0.1.0 (2024.08)
 - Removed fernflower/cfr decompilers
-- Using Procyon `LineNumberFormatter` for better debug line alignment
+- Using Procyon `LineNumberFormatter` for debug line alignment
 
-### 2021.07.18
-- Updated Procyon to support JDK 11
-- When `showDebugLineNumbers` is enabled, output lines are aligned to original source lines
+### 0.0.1 (2021.07)
+- Initial release with Procyon decompiler
