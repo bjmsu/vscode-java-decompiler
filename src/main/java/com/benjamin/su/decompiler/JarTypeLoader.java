@@ -17,24 +17,33 @@ public class JarTypeLoader implements ITypeLoader, AutoCloseable {
 
     public JarTypeLoader(String archivePath) throws IOException {
         this.zipFile = new ZipFile(archivePath);
-        boolean isWar = archivePath.toLowerCase().endsWith(".war")
-                || zipFile.getEntry("WEB-INF/classes/") != null;
-        boolean isSpringBoot = zipFile.getEntry("BOOT-INF/classes/") != null;
-        this.classPrefix = isWar ? "WEB-INF/classes/" : isSpringBoot ? "BOOT-INF/classes/" : "";
+        if (archivePath.toLowerCase().endsWith(".war") || zipFile.getEntry("WEB-INF/classes/") != null) {
+            this.classPrefix = "WEB-INF/classes/";
+        } else if (zipFile.getEntry("BOOT-INF/classes/") != null) {
+            this.classPrefix = "BOOT-INF/classes/";
+        } else {
+            this.classPrefix = "";
+        }
     }
 
     @Override
     public boolean tryLoadType(String internalName, Buffer buffer) {
-        String entryName = classPrefix + internalName + ".class";
-        ZipEntry entry = zipFile.getEntry(entryName);
-        if (entry != null) {
-            try (InputStream is = zipFile.getInputStream(entry)) {
-                byte[] bytes = is.readAllBytes();
-                buffer.reset(bytes.length);
-                System.arraycopy(bytes, 0, buffer.array(), 0, bytes.length);
-                return true;
-            } catch (IOException e) {
-                // fall through to fallback
+        // try configured prefix first (e.g. BOOT-INF/classes/ or WEB-INF/classes/),
+        // then root prefix as fallback for loader/framework classes at the archive root
+        String[] prefixes = classPrefix.isEmpty()
+                ? new String[]{""}
+                : new String[]{classPrefix, ""};
+        for (String prefix : prefixes) {
+            ZipEntry entry = zipFile.getEntry(prefix + internalName + ".class");
+            if (entry != null) {
+                try (InputStream is = zipFile.getInputStream(entry)) {
+                    byte[] bytes = is.readAllBytes();
+                    buffer.reset(bytes.length);
+                    System.arraycopy(bytes, 0, buffer.array(), 0, bytes.length);
+                    return true;
+                } catch (IOException e) {
+                    // fall through to next prefix
+                }
             }
         }
         return fallback.tryLoadType(internalName, buffer);

@@ -4,7 +4,7 @@
     "description": "Decompile Java via Procyon, and format",
     "author": "BenjaminSu",
     "icon": "icon.png",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "license": "EPL-1.0",
     "publisher": "BenjaminSu",
     "main": "./out/extension.js",
@@ -120,6 +120,12 @@
             "type": "object",
             "title": "Decompiler configuration",
             "properties": {
+                "java.decompiler.engine": {
+                    "type": "string",
+                    "enum": ["procyon", "vineflower"],
+                    "default": "procyon",
+                    "description": "Decompiler engine: vineflower (default, better Java 17+ support) or procyon (legacy)."
+                },
                 "java.decompiler.procyon": {
                     "type": "object",
                     "description": "Procyon configuration",

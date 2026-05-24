@@ -10,7 +10,8 @@ import org.eclipse.core.runtime.CoreException;
 
 public class TestMain {
     public static void main(String[] args) throws CoreException, URISyntaxException {
-        ProcyonDecompiler pd=new ProcyonDecompiler();
-        System.out.println(pd.getContent(new URI(ArrayList.class.getName()), null));
+        VineflowerDecompiler pd=new VineflowerDecompiler();
+       
+        System.out.println(pd.getContent(new URI("file://" + "/home/kubuntu/project/springbot/target/classes/com/bot/chain/wallet/TronWalletUtils.class"), null));
     }
 }

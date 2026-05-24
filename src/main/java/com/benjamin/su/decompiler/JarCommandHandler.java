@@ -29,7 +29,7 @@ public class JarCommandHandler implements IDelegateCommandHandler {
     public static final String CMD_GET_INNER_CLASS_LINE        = "decompile.getInnerClassLine";
     public static final String CMD_GET_NESTED_INNER_CLASS_LINE = "decompile.getNestedInnerClassLine";
 
-    private static final ProcyonDecompiler decompiler = new ProcyonDecompiler();
+    private static final DecompilerDispatcher decompiler = new DecompilerDispatcher();
     private static final Map<String, String> cache = new ConcurrentHashMap<>();
 
     @Override
@@ -133,27 +133,13 @@ public class JarCommandHandler implements IDelegateCommandHandler {
         if (dollarIdx != -1) {
             internalName = internalName.substring(0, dollarIdx);
         }
-        String key = archivePath + "!" + nestedJarEntry + "!" + internalName;
+        String key = DecompilerDispatcher.currentEngineTag() + "!" + archivePath + "!" + nestedJarEntry + "!" + internalName;
         String cached = cache.get(key);
         if (cached != null) return cached;
 
-        try (ZipFile outer = new ZipFile(archivePath)) {
-            ZipEntry nested = outer.getEntry(nestedJarEntry);
-            if (nested == null) return null;
-            Path tmp = Files.createTempFile("decompiler-nested-", ".jar");
-            try {
-                try (InputStream is = outer.getInputStream(nested)) {
-                    Files.write(tmp, is.readAllBytes());
-                }
-                try (JarTypeLoader loader = new JarTypeLoader(tmp.toString())) {
-                    String result = decompiler.getContent(loader, internalName, monitor);
-                    if (result != null) cache.put(key, result);
-                    return result;
-                }
-            } finally {
-                Files.deleteIfExists(tmp);
-            }
-        }
+        String result = decompiler.decompileFromNestedJar(archivePath, nestedJarEntry, internalName, monitor);
+        if (result != null) cache.put(key, result);
+        return result;
     }
 
     private String decompile(String archivePath, String classEntry, IProgressMonitor monitor) throws Exception {
@@ -171,15 +157,13 @@ public class JarCommandHandler implements IDelegateCommandHandler {
         if (dollarIdx != -1) {
             internalName = internalName.substring(0, dollarIdx);
         }
-        String key = archivePath + "!" + internalName;
+        String key = DecompilerDispatcher.currentEngineTag() + "!" + archivePath + "!" + internalName;
         String cached = cache.get(key);
         if (cached != null) return cached;
 
-        try (JarTypeLoader loader = new JarTypeLoader(archivePath)) {
-            String result = decompiler.getContent(loader, internalName, monitor);
-            if (result != null) cache.put(key, result);
-            return result;
-        }
+        String result = decompiler.decompileFromJar(archivePath, internalName, monitor);
+        if (result != null) cache.put(key, result);
+        return result;
     }
 
     private int getInnerClassStartLine(String archivePath, String classEntry) throws IOException {
